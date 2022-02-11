@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -13,18 +12,41 @@ import "./OrderStatisticsTreeLib.sol";
 import "./CryptoCocksWhitelistingLib.sol";
 import "./CryptoCocksLib.sol";
 
-contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URIStorage, Ownable {
+/**
+ * CryptoCocks is a decentralized generative art project where the rarity of the
+ * unique digital collectibles (ERC721 NFTs) not only is determined by
+ * pseudo-randomly assigned traits of varying frequency but also how someone's
+ * wallet balance at the time of minting compares with the wallet balance of
+ * previous minters at the time they minted their token. CryptoCocks tokens
+ * are fair-priced meaning that the cost for minting will always be 1% of that
+ * minter's wallet balance and is primarily decisive for the rarity of the minted NFT.
+ * The total supply of CryptoCocks is limited to 10000 unique tokens and each image
+ * is stored decentralized on IPFS and Filecoin forever.
+ */
+contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     using OrderStatisticsTreeLib for OrderStatisticsTreeLib.Tree;
     using CryptoCocksWhitelistingLib for CryptoCocksWhitelistingLib.Whitelist;
 
     struct Settings {
-        bool publicSaleStatus; // true => active public sale
-        bool freeMinting; // true => minting does not require fee
-        bool initMint; // true => initMint was not yet executed
-        bool isWhitelistingEnabled; // true => whitelist checks are executed
-        uint8 percFee; // int only (e.g., 1/100)
-        uint128 minFee; // in Wei
+        // true => active public sale
+        bool publicSaleStatus;
+
+        // true => minting does not require fee
+        bool freeMinting;
+
+        // true => initMint was not yet executed
+        bool initMint;
+
+        // true => whitelist checks are executed
+        bool isWhitelistingEnabled;
+
+        // Percentages of the minter's wallet balance to be sent
+        // to the contract as ether value when minting.
+        uint8 percFee;
+
+        // Minimum of sent Ether value in Wei required when minting
+        uint128 minFee;
     }
 
     struct Balances {
@@ -49,74 +71,72 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     );
 
     Counters.Counter private _tokenIdTracker;
-    OrderStatisticsTreeLib.Tree public tree;
+    OrderStatisticsTreeLib.Tree private tree;
     CryptoCocksWhitelistingLib.Whitelist private whitelist;
 
     Settings public set;
-    Balances public bal;
+    Balances public bal; // Tracks collected ether for team and donation wallet
 
-    address payable public teamWallet;
-    address payable public donationWallet;
+    address payable public teamWallet; // Receives 50% of revenue
+    address payable public donationWallet; // Receives 30% of revenue
 
     constructor() {
-        set = Settings(false, true, true, true, 100, 0.02 ether);
+        set = Settings(false, true, true, true, 100, 0.02 ether); // Set default settings
         bal = Balances(0, 0);
-        teamWallet = payable(0x5b1f57449Dd479e787FDF201a59d06D3Cb84F5Dc); //multisig address
-        donationWallet = payable(0xb1019Eb5e90aD29C2FcE82AAB712325a1A3d5924); //enter giving block address
+
+        // Multisig team wallet address
+        teamWallet = payable(0x5b1f57449Dd479e787FDF201a59d06D3Cb84F5Dc);
+
+        // The Giving Block donation address ('Trees for the Future' reforestation project)
+        donationWallet = payable(0xb1019Eb5e90aD29C2FcE82AAB712325a1A3d5924);
     }
 
     /**
-     * Mints new NFT, storing position in tree, constructs tokenURI and executes fee payment
+     * - Mints new NFT.
+     * - Stores balance in tree.
+     * - Calculates cock length.
+     * - Constructs token.
+     * - Transfers collected revenue every 50th mint.
      */
-    function mint()
-    external
-    virtual
-    payable
-    {
-        uint16 newTokenId = uint16(_tokenIdTracker.current() + 31);
+    function mint() external virtual payable {
+        uint16 newTokenId = uint16(_tokenIdTracker.current() + 31); // 30 initial mints + 1 (tokenIDs should begin with 1)
         uint value = msg.value;
         (bool wL, uint8 idx) = set.isWhitelistingEnabled ? whitelist.checkListed(msg.sender) : (false, 0);
 
-        // test conditions
+        // Test conditions
         require((set.publicSaleStatus || wL), "LOCK");
         require(newTokenId <= uint16(10000), "TOTAL_SUPPLY_REACHED");
         require(balanceOf(msg.sender) == 0, "ONLY_ONE_NFT");
 
+        // Calculate balance
         uint balance = msg.sender.balance + value;
         if (!set.freeMinting) {
             require(value >= ((balance / set.percFee) < set.minFee ? set.minFee : (balance / set.percFee)), "INSUFFICIENT_FUNDS");
             balance = value * set.percFee;
         }
 
+        // Internal function to safely mint a new token.
+        // Reverts if the given token ID already exists.
         _safeMint(msg.sender, uint(newTokenId));
 
-        // create token URI
+        // Create tokenURI
         _createTokenURI(newTokenId, tree.insertCock(newTokenId, balance));
         _tokenIdTracker.increment();
         emit Mint(newTokenId, balance);
 
-        /**
-         * Store fees in tracker variable
-         */
+        // Store fees in tracker variable
         bal.team += SafeCast.toUint128(value / 2); // 50% to team
         bal.donation += SafeCast.toUint128((value * 30) / 100); // 30% donated
 
-        /**
-         * Deposit royalty fee in each community wallet
-         * 20% to communities
-         */
+        // Deposit royalty fee in each community wallet 20% to communities
         whitelist.depositRoyalties(SafeCast.toUint128(value));
 
-        /**
-         * Increase supply tracker of whitelisted contract, if applicable.
-         */
+        // Increase supply tracker of whitelisted contract, if applicable.
         if (wL) {
             whitelist.increaseSupply(idx);
         }
 
-        /**
-         * Execute fee transactions every 50th NFT.
-         */
+        // Execute fee transactions every 50th NFT.
         if (newTokenId % 50 == 0) {
             uint teamAmount = bal.team;
             uint donationAmount = bal.donation;
@@ -141,28 +161,33 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     }
 
     /**
-     * Add contract address to whitelisting with maxSupply
-     * Allows token holders to mint NFTs before the Public Sale start
+     * Add community contract to whitelist
+     *
+     * Allows token holders to mint NFTs before public sale starts.
+     * 20% of the collected ether value on mints is distributed to the registered communities
      */
     function addWhiteListing(
-        uint8 id,
-        bool erc1155,
-        address cc,
-        address payable wallet,
-        uint16 maxSupply,
-        uint16 minBalance,
-        uint8 percRoyal,
-        uint erc1155Id
+        uint8 id, // unique identifier of a ListContract instance
+        bool erc1155, // true if contract implements IERC11555 otherwise IERC20/IERC721
+        address cc, // community contract addresses
+        address payable wallet, // community wallet addresses
+        uint16 maxSupply, // max NFTs for whitelisted owners
+        uint16 minBalance, // min balance needed on whitelisted contracts
+        uint8 percRoyal, // percentage royal fee for each contract
+        uint erc1155Id // optional: erc1155 token type id
     ) external onlyOwner {
         whitelist.addContract(id, erc1155, cc, wallet, maxSupply, minBalance, percRoyal, erc1155Id);
     }
 
+    /**
+     * Remove whitelisted community contract
+     */
     function removeWhitelisting(uint8 lcId) external onlyOwner {
         whitelist.removeContract(lcId);
     }
 
     /**
-     * Transfer royalties from contract address to registered community wallet
+     * Transfer royalties from contract to registered community wallet
      */
     function transferRoyalty() external {
         Address.sendValue(payable(msg.sender), whitelist.popRoyalties(msg.sender));
@@ -178,14 +203,23 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         set.minFee = minFee; // minFee, denoted in Wei
     }
 
+    /**
+     * Enable or disable whitelisting functionality
+     */
     function changeWhitelistingSettings(bool enabled) external onlyOwner {
         set.isWhitelistingEnabled = enabled;
     }
 
+    /**
+     * Get whitelisted community contract information by identifier
+     */
     function getListContract(uint8 lcId) external view returns (CryptoCocksWhitelistingLib.ListContract memory lc) {
         return whitelist.getListContract(lcId);
     }
 
+    /**
+     * Query token balance of an account from the community token specified by list index
+     */
     function queryBalance(uint8 listIndex, address addressToQuery) external view returns (uint) {
         return whitelist.queryBalance(listIndex, addressToQuery);
     }
@@ -210,33 +244,10 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
     }
 
     /**
-     * Using ERC721Enumerable over ERC721 for supportsInterface()
+     * Gets the total amount of tokens stored by the contract.
      */
-    function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    override(ERC721, ERC721Enumerable)
-    returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
-    }
-
-    /**
-     * Using ERC721Enumerable over ERC721 for _beforeTokenTransfer()
-     */
-    function _beforeTokenTransfer(address from, address to, uint tokenId)
-    internal
-    override(ERC721, ERC721Enumerable)
-    {
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
-
-    // slither-disable-next-line dead-code
-    function _burn(uint tokenId)
-    internal
-    override(ERC721, ERC721URIStorage)
-    {
-        super._burn(tokenId);
+    function totalSupply() external view returns (uint256) {
+        return set.initMint ? _tokenIdTracker.current() : _tokenIdTracker.current() + 30;
     }
 
     /**
@@ -246,5 +257,13 @@ contract CryptoCocks is ERC721("CryptoCocks", "CC"), ERC721Enumerable, ERC721URI
         string memory _tokenURI = string(abi.encodePacked(Strings.toString(_length), "_", Strings.toString(_newTokenId), ".json"));
         _setTokenURI(_newTokenId, _tokenURI);
         emit PermanentURI(_tokenURI, _newTokenId);
+    }
+
+    // slither-disable-next-line dead-code
+    function _burn(uint tokenId)
+    internal
+    override(ERC721, ERC721URIStorage)
+    {
+        super._burn(tokenId);
     }
 }
