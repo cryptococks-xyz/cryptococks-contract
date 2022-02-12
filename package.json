@@ -15,6 +15,7 @@
     "deploy:rinkeby": "hardhat run scripts/deploy.ts --network rinkeby",
     "deploy:mainnet": "hardhat run scripts/deploy.ts --network mainnet",
     "deploy": "hardhat run scripts/deploy.ts --network localhost",
+    "whitelisting": "hardhat run scripts/add-whitelists.ts --network rinkeby",
     "verify": "hardhat verify --network rinkeby 0x31c049594c18Ac0b0F681c376c7c3F0C5c0d2333"
   },
   "engines": {

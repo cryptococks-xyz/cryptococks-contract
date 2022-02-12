@@ -66,7 +66,7 @@ describe("Mint", function () {
           owner,
           contracts.testTokenOne.address,
           0,
-          signer1,
+          signer1.address,
           maxSupply,
           minBalance,
           10
@@ -138,7 +138,7 @@ describe("Mint", function () {
           owner,
           contracts.testTokenOne.address,
           0,
-          signer1,
+          signer1.address,
           2,
           minBalanceTokenOne,
           10
@@ -149,7 +149,7 @@ describe("Mint", function () {
           owner,
           contracts.testTokenTwo.address,
           1,
-          signer2,
+          signer2.address,
           2,
           minBalanceTokenTwo,
           10
