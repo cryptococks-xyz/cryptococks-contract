@@ -105,7 +105,7 @@ describe("Transfers", function () {
         owner,
         communityToken.address,
         0,
-        communityWallet,
+        communityWallet.address,
         maxSupply,
         minBalance,
         percRoyal
