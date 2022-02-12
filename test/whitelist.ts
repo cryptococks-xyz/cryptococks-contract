@@ -123,6 +123,63 @@ describe("Whitelist", function () {
         );
       }
     });
+
+    it("should reset percRoyal when removing contract", async () => {
+      const percRoyals = [8, 6, 4, 2, 1]; // 21% (last transaction should fail)
+      const communityWallet = signer1;
+      const testToken = contracts.testTokenOne;
+
+      for (const percRoyal of percRoyals) {
+        // last transaction should fail
+        const index = percRoyals.indexOf(percRoyal);
+        let expectRevert = false;
+        if (index === percRoyals.length - 1) {
+          expectRevert = true;
+        }
+
+        await addWhitelistedContract(
+          contracts.cryptoCocks,
+          owner,
+          testToken.address,
+          index,
+          communityWallet.address,
+          2,
+          100,
+          percRoyal,
+          expectRevert
+        );
+      }
+
+      // remove contract
+      await assertListContract(contracts.cryptoCocks, 0);
+      const tx1 = contracts.cryptoCocks.connect(owner).removeWhitelisting(0);
+      await expect(tx1).to.not.be.reverted;
+      await assertListContract(contracts.cryptoCocks, 0, false);
+
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        testToken.address,
+        0,
+        communityWallet.address,
+        2,
+        100,
+        percRoyals[0] + 1,
+        true
+      );
+
+      await addWhitelistedContract(
+        contracts.cryptoCocks,
+        owner,
+        testToken.address,
+        0,
+        communityWallet.address,
+        2,
+        100,
+        percRoyals[0],
+        false
+      );
+    });
   });
 
   describe("Remove Contracts", function () {
