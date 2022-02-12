@@ -41,6 +41,32 @@ This repository contains the solidity contracts powering CryptoCocks.
     <img src="https://storage.googleapis.com/crypto-cocks/svgs/11/5/cock.svg" width="200" alt="CryptoCock 5" />
 </p>
 
+# IPFS
+## Metadata
+| Min Token ID   | Max Token ID  | IPFS CID | Gateway  |
+|---|---|---|---|
+| 1  | 2000  | bafybeiesbbihtfdj3kqbah5642p7drsb6hrzwzksezbgb2t2ojjwgh2k5m  | [link](https://bafybeiesbbihtfdj3kqbah5642p7drsb6hrzwzksezbgb2t2ojjwgh2k5m.ipfs.dweb.link)  |
+| 2001  | 4000  | bafybeifclnruolpdcsouhmzhnardvpzroxk6qouc53drw4vh2f3zdoouya  | [link](https://bafybeifclnruolpdcsouhmzhnardvpzroxk6qouc53drw4vh2f3zdoouya.ipfs.dweb.link)   |
+| 4001  | 6000  | bafybeihbeszvaoc3exx6ji77g74nyuqmoz2scdykudna3qd6xzgygn36ra  | [link](https://bafybeihbeszvaoc3exx6ji77g74nyuqmoz2scdykudna3qd6xzgygn36ra.ipfs.dweb.link)  |
+| 6001  | 8000  | bafybeidl3uswhq65hnfvgj6bfahbvdb57y7cxiaelgct6q7raweubcms6u   | [link](https://bafybeidl3uswhq65hnfvgj6bfahbvdb57y7cxiaelgct6q7raweubcms6u.ipfs.dweb.link)  |
+| 8001  | 10000  | bafybeifx2hrh6mhbpcivo4z53l76uqwc6fth4nf4qah6aow7e62lcka3d4   | [link](https://bafybeifx2hrh6mhbpcivo4z53l76uqwc6fth4nf4qah6aow7e62lcka3d4.ipfs.dweb.link)  |
+
+## Images
+| Length | IPFS CID | Gateway |
+|---|---|---|
+|1|bafybeidgznl4kxsrvcnob2mjxaugxsewvomt2ugumuek6jkmwg2qnplbhy|[link](https://bafybeidgznl4kxsrvcnob2mjxaugxsewvomt2ugumuek6jkmwg2qnplbhy.ipfs.dweb.link)|
+|2|bafybeiddwhda4ucs3oqlvrqabc2oiluumv7zrsyuq3er3zzlcgcuwltod4|[link](https://bafybeiddwhda4ucs3oqlvrqabc2oiluumv7zrsyuq3er3zzlcgcuwltod4.ipfs.dweb.link)|
+|3|bafybeiazprkpomsikvdxyrur75freaqopon4pxhzq2bvt6w6hzx7yga6qa|[link](https://bafybeiazprkpomsikvdxyrur75freaqopon4pxhzq2bvt6w6hzx7yga6qa.ipfs.dweb.link)|
+|4|bafybeicymvym3nlkmepptxznn6mlc5pjt6xn4gzxzukja5wyri3t4zawwi|[link](https://bafybeicymvym3nlkmepptxznn6mlc5pjt6xn4gzxzukja5wyri3t4zawwi.ipfs.dweb.link)|
+|5|bafybeifb3upudkwuw7gq5yqnbtss2r22hjnz5ngwybsxywg6w64fnzkphm|[link](https://bafybeifb3upudkwuw7gq5yqnbtss2r22hjnz5ngwybsxywg6w64fnzkphm.ipfs.dweb.link)|
+|6|bafybeiarocxbhl2vx52thdhebsjdn7dbmaxjk6e2e6ivw5opsi4ihsmtma|[link](https://bafybeiarocxbhl2vx52thdhebsjdn7dbmaxjk6e2e6ivw5opsi4ihsmtma.ipfs.dweb.link)|
+|7|bafybeidj7eio5gspvapwux2oxupju35aprrvcrudsvscsnmbshrtzhrose|[link](https://bafybeidj7eio5gspvapwux2oxupju35aprrvcrudsvscsnmbshrtzhrose.ipfs.dweb.link)|
+|8|bafybeigli4kkcnts7q3kcgegdf6lvnboml5g4eepwpwcozkzgq2ihfj4mm|[link](https://bafybeigli4kkcnts7q3kcgegdf6lvnboml5g4eepwpwcozkzgq2ihfj4mm.ipfs.dweb.link)|
+|9|bafybeifiyx2etlte2ebhj2glgixtwu5d4xjqt3qrbmmdfjqqxd6zgliglm|[link](https://bafybeifiyx2etlte2ebhj2glgixtwu5d4xjqt3qrbmmdfjqqxd6zgliglm.ipfs.dweb.link)|
+|10|bafybeidodcrxbwdzpopchv5xdn7nj5adrus6xgelusd6r6cfc2spb6t3g4|[link](https://bafybeidodcrxbwdzpopchv5xdn7nj5adrus6xgelusd6r6cfc2spb6t3g4.ipfs.dweb.link)|
+|10<sup>*</sup>|bafybeidzb6zbvffokobhko4rstlau4x6jwi6r42ifu2stuhogfr74kecnu|[link](https://bafybeidzb6zbvffokobhko4rstlau4x6jwi6r42ifu2stuhogfr74kecnu.ipfs.dweb.link)|
+
+<sup>*</sup>Length 10 with `All Time High` characteristic.
 
 # Commands
 ## Deploy
@@ -84,16 +110,16 @@ npx solhint 'contracts/**/*.sol' --fix
 
 To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
 
-In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL, e.g., from Alchemy, and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
+In this project, copy the `.env.example` file to a file named `.env`, and then edit it to fill in the details. Enter your Etherscan API key, your Rinkeby node URL, e.g., from Alchemy, and the private key of the account which will send the deployment transaction. With a valid `.env` file in place, first deploy your contract:
 
 ```shell
-npx hardhat run --network ropsten scripts/sample-script.ts
+npm run deploy:rinkeby
 ```
 
-Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
+Then, copy the deployment address(es) and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
 
 ```shell
-npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
+npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS
 ```
 
 # Performance optimizations
