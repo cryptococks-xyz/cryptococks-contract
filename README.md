@@ -42,6 +42,9 @@ This repository contains the solidity contracts powering CryptoCocks.
 </p>
 
 # IPFS
+Since the allocation of the length of the cocks when minting is completely dynamic we have to provide 10000 unique images for each of the 10 (+1 for `All Time High` cocks) available lengths.
+To facilitate the IPFS upload of the total `10000 * 11 * 2 = 220000` files we have decided to upload the metadata and images in batches.
+
 ## Metadata
 | Min Token ID   | Max Token ID  | IPFS CID | Gateway  |
 |---|---|---|---|
