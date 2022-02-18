@@ -5,7 +5,7 @@ import { addWhitelistedContracts } from "../test/helper";
 dotenv.config();
 
 async function main() {
-  const CONTRACT_ADDRESS = "0x76285B02D778D06813f9C287640C35f82041B4a1";
+  const CONTRACT_ADDRESS = "0x2aDcfaFb356F0942B8432C036dDA41F6C0d2877F";
   const cryptoCocks: CryptoCocks = await hre.ethers.getContractAt(
     "CryptoCocks",
     CONTRACT_ADDRESS

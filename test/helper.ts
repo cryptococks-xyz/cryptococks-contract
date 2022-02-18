@@ -496,10 +496,10 @@ const MAX_SUPPLY = {
 
 const MIN_BALANCE = {
   kryptonauten: 1,
-  duckdao: 100,
+  duckdao: 29,
   lobsterdao: 1,
-  cyberkongz: 5,
-  daomaker: 300,
+  cyberkongz: 1,
+  daomaker: 260,
   neotokyo: 1,
 };
 
